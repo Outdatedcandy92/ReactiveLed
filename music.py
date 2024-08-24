@@ -12,10 +12,29 @@ CHUNK = 1024
 
 audio = pyaudio.PyAudio()
 
+print("Available audio devices:")
+for i in range(audio.get_device_count()):
+    info = audio.get_device_info_by_index(i)
+    print(f"{i}: {info['name']}")
+
+device_index = None
+for i in range(audio.get_device_count()):
+    info = audio.get_device_info_by_index(i)
+    if 'CABLE Output (VB-Audio Virtual Cable)' in info['name']:
+        device_index = i
+        break
+
+if device_index is None:
+    print("Virtual Audio Cable not found. Please ensure it is installed and set as the default playback device.")
+    exit(1)
+
+print(f"Using device index: {device_index}")
+
 stream = audio.open(format=FORMAT,
                     channels=CHANNELS,
                     rate=RATE,
                     input=True,
+                    input_device_index=device_index,
                     frames_per_buffer=CHUNK)
 
 def get_amplitude(data):
